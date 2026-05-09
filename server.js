@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 app.post('/chat', async (req, res) => {
   try {
     // This is the most stable string for the Flash model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const userMessage = req.body.message;
 
     const result = await model.generateContent(userMessage);
