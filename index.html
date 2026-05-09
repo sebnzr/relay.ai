@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Relay AI</title>
+  <style>
+    :root {
+      --glass: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --glow: #38bdf8;
+    }
+    body {
+      background: #020617;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chat-card {
+      width: 450px;
+      height: 600px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    #chat-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: var(--glow);
+    }
+    #messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .msg { padding: 12px 16px; border-radius: 12px; max-width: 80%; line-height: 1.4; }
+    .user { align-self: flex-end; background: var(--glow); color: #020617; font-weight: 500; }
+    .ai { align-self: flex-start; background: rgba(255,255,255,0.1); border: 1px solid var(--border); }
+    
+    .input-box {
+      padding: 20px;
+      display: flex;
+      gap: 10px;
+      background: rgba(0,0,0,0.2);
+    }
+    input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      color: white;
+      outline: none;
+    }
+    button {
+      background: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+  </style>
+</head>
+<body>
+
+  <div id="chat-card">
+    <div id="chat-header">RELAY AI</div>
+    <div id="messages"></div>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()">SEND</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const box = document.getElementById('messages');
+      const text = input.value.trim();
+      if (!text) return;
+
+      box.innerHTML += `<div class="msg user">${text}</div>`;
+      input.value = '';
+      box.scrollTop = box.scrollHeight;
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await response.json();
+        box.innerHTML += `<div class="msg ai">${data.reply}</div>`;
+      } catch (e) {
+        box.innerHTML += `<div class="msg ai">Error connecting to Gemini.</div>`;
+      }
+      box.scrollTop = box.scrollHeight;
+    }
+  </script>
+</body>
+</html>
