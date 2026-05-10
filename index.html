@@ -10,6 +10,8 @@
       --border: rgba(255, 255, 255, 0.1);
       --glow: #38bdf8;
     }
+
+    /* This part fixes the "jumping to the top" issue */
     body {
       background: #020617;
       color: white;
@@ -17,37 +19,39 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      height: 100vh; /* Keeps it centered vertically */
       margin: 0;
+      overflow: hidden;
     }
+
     #chat-card {
-      width: 800px;  /* Much wider */
-      height: 85vh;  /* Much taller */
+      width: 800px;
+      height: 85vh;
       background: var(--glass);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 24px;
       display: flex;
       flex-direction: column;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
-    /* Find this section */
-/* Update the header container */
-#chat-header {
-  padding: 15px; /* Reduced padding to fit the logo better */
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-/* Style the logo image */
-#chat-header img {
-  max-height: 60px; /* Adjust this if your logo looks too small/big */
-  width: auto;
-  filter: drop-shadow(0 0 8px var(--glow)); /* This makes your logo glow! */
-}
+    #chat-header {
+      padding: 15px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60px;
     }
+
+    #chat-header img {
+      max-height: 50px;
+      width: auto;
+      filter: drop-shadow(0 0 8px var(--glow));
+    }
+
     #messages {
       flex: 1;
       padding: 20px;
@@ -56,15 +60,10 @@
       flex-direction: column;
       gap: 15px;
     }
+
     .msg { padding: 12px 16px; border-radius: 12px; max-width: 85%; line-height: 1.5; }
     .user { align-self: flex-end; background: var(--glow); color: #020617; font-weight: 500; }
     .ai { align-self: flex-start; background: rgba(255,255,255,0.1); border: 1px solid var(--border); }
-    
-    /* Clean up the markdown formatting inside the chat bubbles */
-    .ai p { margin-top: 0; margin-bottom: 10px; }
-    .ai p:last-child { margin-bottom: 0; }
-    .ai pre { background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; overflow-x: auto; }
-    .ai code { background: rgba(0,0,0,0.4); padding: 2px 5px; border-radius: 4px; font-family: monospace; }
     
     .input-box {
       padding: 20px;
@@ -73,16 +72,8 @@
       gap: 15px;
       background: rgba(0,0,0,0.2);
     }
-    .search-toggle {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      color: #94a3b8;
-    }
-    .search-toggle input { cursor: pointer; }
-    .input-box input[type="text"] {
+
+    input[type="text"] {
       flex: 1;
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--border);
@@ -91,6 +82,7 @@
       color: white;
       outline: none;
     }
+
     button {
       background: white;
       border: none;
@@ -98,23 +90,19 @@
       border-radius: 12px;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.2s;
     }
-    button:hover { transform: scale(1.05); }
   </style>
 </head>
 <body>
 
   <div id="chat-card">
     <div id="chat-header">
-        <img src="relaylogo.png" alt="Relay Logo">
+      <img src="/relaylogo.png" alt="Relay AI Logo">
     </div>
     <div id="messages"></div>
-    ...
     <div class="input-box">
-      <label class="search-toggle">
-        <input type="checkbox" id="searchToggle"> 
-        Web Search
+      <label style="color: #94a3b8; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
+        <input type="checkbox" id="searchToggle"> Web
       </label>
       <input type="text" id="userInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
       <button onclick="sendMessage()">SEND</button>
@@ -138,17 +126,12 @@
         const response = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            message: text,
-            useSearch: searchToggle // Send the toggle state to the server
-          })
+          body: JSON.stringify({ message: text, useSearch: searchToggle })
         });
         const data = await response.json();
-        
-        // Use 'marked' to convert the Markdown into clean HTML
         box.innerHTML += `<div class="msg ai">${marked.parse(data.reply)}</div>`;
       } catch (e) {
-        box.innerHTML += `<div class="msg ai">Error connecting to server.</div>`;
+        box.innerHTML += `<div class="msg ai">Connection Error.</div>`;
       }
       box.scrollTop = box.scrollHeight;
     }
