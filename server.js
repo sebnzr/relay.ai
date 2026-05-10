@@ -4,6 +4,7 @@ const path = require('path');
 const app = express();
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname)));
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
